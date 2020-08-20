@@ -4,6 +4,7 @@ const ManifestPlugin = require("webpack-manifest-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 const { overrideDevServer } = require("customize-cra");
+const ChromeExtensionReloader = require("webpack-chrome-extension-reloader");
 
 const devServerConfig = () => (config) => {
   return {
@@ -23,7 +24,7 @@ function override(config, env) {
   // Note: you may remove any property below except "popup" to exclude respective entry point from compilation
 
   config.entry = {
-    popup: paths.appIndexJs,
+    index: paths.appIndexJs,
     options: paths.appSrc + "/options",
     background: paths.appSrc + "/background",
     content: paths.appSrc + "/content",
@@ -124,6 +125,7 @@ function override(config, env) {
   });
 
   config.plugins.push(copyPlugin);
+  config.plugins.push(new ChromeExtensionReloader());
 
   return config;
 }
