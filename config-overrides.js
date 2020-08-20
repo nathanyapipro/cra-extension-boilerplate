@@ -2,12 +2,8 @@ const paths = require("react-scripts/config/paths");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ManifestPlugin = require("webpack-manifest-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-
-const {
-  // override,
-  overrideDevServer,
-  // addWebpackPlugin,
-} = require("customize-cra");
+const CopyPlugin = require("copy-webpack-plugin");
+const { overrideDevServer } = require("customize-cra");
 
 const devServerConfig = () => (config) => {
   return {
@@ -61,7 +57,7 @@ function override(config, env) {
   const indexHtmlPlugin = new HtmlWebpackPlugin({
     inject: true,
     chunks: ["popup"],
-    template: paths.appHtml,
+    template: paths.appPublic + "/index.html",
     filename: "index.html",
     minify: isEnvProduction && minifyOpts,
   });
@@ -72,6 +68,17 @@ function override(config, env) {
     (name) => /HtmlWebpackPlugin/i.test(name),
     indexHtmlPlugin
   );
+
+  // Custom HtmlWebpackPlugin instance for popop (popup) page
+  const popupHtmlPlugin = new HtmlWebpackPlugin({
+    inject: true,
+    chunks: ["popup"],
+    template: paths.appPublic + "/popup.html",
+    filename: "popup.html",
+    minify: isEnvProduction && minifyOpts,
+  });
+
+  config.plugins.push(popupHtmlPlugin);
 
   // Extra HtmlWebpackPlugin instance for options page
   const optionsHtmlPlugin = new HtmlWebpackPlugin({
@@ -111,6 +118,12 @@ function override(config, env) {
   config.plugins = replacePlugin(config.plugins, (name) =>
     /GenerateSW/i.test(name)
   );
+
+  const copyPlugin = new CopyPlugin({
+    patterns: [{ from: "public", to: "" }],
+  });
+
+  config.plugins.push(copyPlugin);
 
   return config;
 }
